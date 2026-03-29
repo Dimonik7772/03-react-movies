@@ -12,15 +12,17 @@ import css from "./App.module.css";
 export default function App() {
    const [movies, setMovies] = useState<Movie[]>([]);
    const [activeMovie, setActiveMovie] = useState<Movie | null>(null);
-   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
    const [isLoading, setIsLoading] = useState<boolean>(false);
    const [isError, setIsError] = useState<boolean>(false);
 
    const handleSubmit = async (query: string) => {
       try {
          setIsLoading(true);
+         setIsError(false);
+         setMovies([]);
+         setActiveMovie(null);
          const Movies = await fetchMovies(query);
-         if (fetchMovies.length > 0) {
+         if (Movies.length > 0) {
             toast.success("Successfully loaded movies.");
             setMovies(Movies);
          } else {
@@ -28,20 +30,18 @@ export default function App() {
          }
       } catch {
          setIsError(true);
+         setMovies([]);
       } finally {
          setIsLoading(false);
       }
    };
    const openModal = (movie: Movie) => {
       setActiveMovie(movie);
-      setIsModalOpen(true);
    };
 
    const closeModal = () => {
       setActiveMovie(null);
-      setIsModalOpen(false);
    };
-   console.log(activeMovie);
    const hasMovies = movies.length > 0;
    return (
       <div className={css.app}>
@@ -50,7 +50,7 @@ export default function App() {
          {isLoading && <Loader />}
          {isError && <ErrorMessage />}
          {hasMovies && <MovieGrid movies={movies} onSelect={openModal} />}
-         {isModalOpen && activeMovie && (
+         {activeMovie && (
             <MovieModal movie={activeMovie} onClose={closeModal} />
          )}
          <div>
